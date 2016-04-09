@@ -22,6 +22,7 @@ public class AddStats extends AppCompatActivity {
 
     private Firebase myReference;
     private EditText AddTitle,AddContent;
+    private String NewTitle,NewContent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,8 +50,8 @@ public class AddStats extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        String NewTitle = AddTitle.getText().toString().trim();
-        String NewContent = AddContent.getText().toString().trim();
+        NewTitle = AddTitle.getText().toString().trim();
+        NewContent = AddContent.getText().toString().trim();
         switch (item.getItemId()){
             case R.id.update:
                 long Time= System.currentTimeMillis();
@@ -63,6 +64,7 @@ public class AddStats extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Added!", Toast.LENGTH_SHORT).show();
                     Intent back = new Intent(AddStats.this,DisplayStats.class);
                     startActivity(back);
+                    finish();
                 }
                 return true;
             default:

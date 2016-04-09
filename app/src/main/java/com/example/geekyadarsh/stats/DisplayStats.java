@@ -9,6 +9,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.view.ContextThemeWrapper;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -41,7 +42,6 @@ public class DisplayStats extends AppCompatActivity {
                 }
             });
         }
-//        Firebase.getDefaultConfig().setPersistenceEnabled(true);
         Firebase.setAndroidContext(this);
         final Firebase myReference = new Firebase("https://status101.firebaseio.com");
 
@@ -158,6 +158,28 @@ public class DisplayStats extends AppCompatActivity {
             }
         });
     }
+
+        @Override
+        public boolean onKeyDown(int keyCode, KeyEvent event) {
+            if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case DialogInterface.BUTTON_POSITIVE:
+                                finish();
+                                break;
+                        }
+                    }
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(DisplayStats.this);
+                builder.setMessage("Do you want to exit?").setPositiveButton("ok", dialogClickListener).setNegativeButton("Cancel", dialogClickListener).show();
+                return true;
+            }
+            return super.onKeyDown(keyCode, event);
+        }
+
 }
 
 

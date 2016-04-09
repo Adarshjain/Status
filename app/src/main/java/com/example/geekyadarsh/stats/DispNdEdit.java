@@ -55,23 +55,6 @@ public class DispNdEdit extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-//    @Override
-//    public boolean onKeyDown(int keyCode, KeyEvent event) {
-//        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-//            String UpdatedValue = Tv.getText().toString().trim();
-//            if (!UpdatedValue.equals(Value)) {
-//                if (!Objects.equals(UpdatedValue, ""))
-//                    myRef.child(Key).setValue(UpdatedValue);
-//                else
-//                    myRef.child(Key).removeValue();
-//                Toast.makeText(getApplicationContext(), "Updated!", Toast.LENGTH_SHORT).show();
-//            }else{
-//                Toast.makeText(getApplicationContext(),"No updates",Toast.LENGTH_SHORT).show();
-//            }
-//        }
-//        return super.onKeyDown(keyCode, event);
-//    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         String NewTitle = TitleET.getText().toString().trim();
@@ -97,6 +80,7 @@ public class DispNdEdit extends AppCompatActivity {
                                 myReference.child(Time).removeValue();
                                 Intent back = new Intent(DispNdEdit.this,DisplayStats.class);
                                 startActivity(back);
+                                finish();
                                 break;
 
                             case DialogInterface.BUTTON_NEGATIVE:
