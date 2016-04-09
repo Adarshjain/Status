@@ -1,7 +1,9 @@
 package com.example.geekyadarsh.stats;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -18,15 +20,16 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class DisplayStats extends AppCompatActivity {
-
-    DatabaseHelper db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_stats);
+
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         if (fab != null) {
@@ -38,77 +41,115 @@ public class DisplayStats extends AppCompatActivity {
                 }
             });
         }
-
-        db = new DatabaseHelper(this);
-
-        addThroughDB();
-
+//        Firebase.getDefaultConfig().setPersistenceEnabled(true);
         Firebase.setAndroidContext(this);
-        Firebase myRef = new Firebase("https://status101.firebaseio.com");
+        final Firebase myReference = new Firebase("https://status101.firebaseio.com");
 
 
-        myRef.addValueEventListener(new ValueEventListener() {
+        myReference.addValueEventListener(new ValueEventListener() {
 
             LinearLayout layout1 = (LinearLayout) findViewById(R.id.left);
             LinearLayout layout2 = (LinearLayout) findViewById(R.id.right);
+            ArrayList<String> times = new ArrayList<>();
+            ArrayList<String> contents = new ArrayList<>();
+            ArrayList<String> titles = new ArrayList<>();
             Boolean pos = true;
 
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                ArrayList<String> val1 = new ArrayList<>();
-                ArrayList<String> val2 = new ArrayList<>();
+                times.clear();
+                contents.clear();
+                titles.clear();
                 layout1.removeAllViews();
                 layout2.removeAllViews();
                 int j = 0;
-                db.dropDB();
-
                 for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-                    val1.add(j, postSnapshot.getValue().toString());
-                    val2.add(j, postSnapshot.getKey());
+                    times.add(postSnapshot.getKey());
+                    Boolean turn = true;
+                    for (DataSnapshot ps1 : postSnapshot.getChildren()) {
+                        if (turn) {
+                            contents.add(ps1.getValue().toString());
+                        }
+                        else {
+                            titles.add(ps1.getValue().toString());
+                        }
+                        turn=!turn;
+                    }
                     j++;
                 }
-                for (int i = val1.size() - 1; i >= 0; i--) {
-                    TextView valueTV = new TextView(DisplayStats.this);
-                    final String valx = val1.get(i);
-                    final String valKey = val2.get(i);
-                    db.insert(valKey,valx);
-                    valueTV.setText(valx);
-                    valueTV.setLayoutParams(new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT));
-                    valueTV.setTextSize(18);
-                    valueTV.setMaxHeight(700);
-                    valueTV.setMinHeight(80);
-
+                for (int i = 0;i < times.size();i++) {
+                    TextView TitleTV = new TextView(DisplayStats.this);
+                    TextView ContentTV = new TextView(DisplayStats.this);
+                    final String content = contents.get(i);
+                    final String title = titles.get(i);
+                    final String time = times.get(i);
+                    TitleTV.setHeight(0);
+                    ContentTV.setHeight(80);
+                    if (!Objects.equals(title, "")){
+                        TitleTV.setText(title);
+                        TitleTV.setLayoutParams(new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT));
+                        TitleTV.setTextSize(18);
+                        TitleTV.setHeight(80);
+                        TitleTV.setTypeface(null, Typeface.BOLD);
+                    }
+                    if (!Objects.equals(content, "")) {
+                        ContentTV.setText(content);
+                        ContentTV.setLayoutParams(new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT));
+                        ContentTV.setTextSize(14);
+                        ContentTV.setMaxHeight(700);
+                        ContentTV.setMinHeight(80);
+                    }
                     CardView card = new CardView(new ContextThemeWrapper(DisplayStats.this, R.style.CardViewStyle), null, 0);
                     LinearLayout cardInner = new LinearLayout(new ContextThemeWrapper(DisplayStats.this, R.style.Widget_CardContent));
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    params.setMargins(8, 8, 8, 8);
+                    params.setMargins(8, 8, 12, 8);
                     card.setLayoutParams(params);
-                    cardInner.addView(valueTV);
+                    cardInner.addView(TitleTV);
+                    cardInner.addView(ContentTV);
                     card.addView(cardInner);
-                    card.setElevation(10);
+                    card.setElevation(5);
                     card.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             Bundle Data = new Bundle();
-                            Data.putString("val",valx);
-                            Data.putString("valKey",valKey);
-                            Intent DNE = new Intent(getApplicationContext(),DispNdEdit.class);
+                            Data.putString("title", title);
+                            Data.putString("content", content);
+                            Data.putString("time", time);
+                            Intent DNE = new Intent(getApplicationContext(), DispNdEdit.class);
                             DNE.putExtras(Data);
                             startActivity(DNE);
                         }
                     });
-                    if (pos) {
+                    card.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    switch (which){
+                                        case DialogInterface.BUTTON_POSITIVE:
+                                            myReference.child(time).removeValue();
+                                            break;
+                                    }
+                                }
+                            };
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(DisplayStats.this);
+                            builder.setMessage("Confirm delete?").setPositiveButton("ok", dialogClickListener).setNegativeButton("Cancel", dialogClickListener).show();
+                            return true;
+                        }
+                    });
+                    if (pos)
                         layout1.addView(card);
-                        pos = !pos;
-                    } else {
+                    else
                         layout2.addView(card);
-                        pos = !pos;
-                    }
+                    pos = !pos;
                 }
                 pos = true;
-                val1.clear();
             }
 
             @Override
@@ -116,60 +157,6 @@ public class DisplayStats extends AppCompatActivity {
                 Toast.makeText(DisplayStats.this, "The read failed: " + firebaseError.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private void addThroughDB() {
-        Cursor res = db.getData();
-        res.moveToFirst();
-
-        LinearLayout layout1 = (LinearLayout) findViewById(R.id.left);
-        LinearLayout layout2 = (LinearLayout) findViewById(R.id.right);
-        Boolean pos = true;
-
-        layout1.removeAllViews();
-        layout2.removeAllViews();
-
-        while (!res.isAfterLast()){
-
-            final String valKey = res.getString(res.getColumnIndex("time"));
-            final String valx = res.getString(res.getColumnIndex("status"));
-            TextView valueTV = new TextView(DisplayStats.this);
-            valueTV.setText(valx);
-            valueTV.setLayoutParams(new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT));
-            valueTV.setTextSize(18);
-            valueTV.setMaxHeight(700);
-            valueTV.setMinHeight(80);
-
-            CardView card = new CardView(new ContextThemeWrapper(DisplayStats.this, R.style.CardViewStyle), null, 0);
-            LinearLayout cardInner = new LinearLayout(new ContextThemeWrapper(DisplayStats.this, R.style.Widget_CardContent));
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            params.setMargins(8, 8, 8, 8);
-            card.setLayoutParams(params);
-            cardInner.addView(valueTV);
-            card.addView(cardInner);
-            card.setElevation(10);
-            card.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Bundle Data = new Bundle();
-                    Data.putString("val", valx);
-                    Data.putString("valKey", valKey);
-                    Intent DNE = new Intent(getApplicationContext(), DispNdEdit.class);
-                    DNE.putExtras(Data);
-                    startActivity(DNE);
-                }
-            });
-            if (pos) {
-                layout1.addView(card);
-                pos = false;
-            } else {
-                layout2.addView(card);
-                pos = true;
-            }
-            res.moveToNext();
-        }
     }
 }
 

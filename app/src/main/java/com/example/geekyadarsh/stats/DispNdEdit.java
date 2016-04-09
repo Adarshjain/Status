@@ -1,12 +1,14 @@
 package com.example.geekyadarsh.stats;
 
-import android.support.v7.app.AppCompatActivity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.view.KeyEvent;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,10 +19,11 @@ import java.util.Objects;
 
 public class DispNdEdit extends AppCompatActivity {
 
-    Firebase myRef;
+    Firebase myReference;
 
-    EditText Tv;
-    String Key,Value;
+    EditText TitleET,ContentET;
+    TextView TimeTV;
+    String Title,Content,Time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,19 +31,21 @@ public class DispNdEdit extends AppCompatActivity {
         setContentView(R.layout.activity_disp_nd_edit);
 
         Firebase.setAndroidContext(this);
-        myRef = new Firebase("https://status101.firebaseio.com");
+        myReference = new Firebase("https://status101.firebaseio.com");
 
-        TextView TKey = (TextView) findViewById(R.id.time);
-        Tv = (EditText) findViewById(R.id.editText);
+        TitleET = (EditText) findViewById(R.id.ETTitle);
+        ContentET = (EditText) findViewById(R.id.ETContent);
+        TimeTV = (TextView) findViewById(R.id.TVTime);
 
         Bundle b = getIntent().getExtras();
-        Value = b.getString("val");
-        Key = b.getString("valKey");
+        Title = b.getString("title");
+        Content = b.getString("content");
+        Time = b.getString("time");
 
-        assert TKey != null;
-        TKey.setText(Key);
-
-        Tv.setText(Value);
+        TitleET.setText(Title);
+        TitleET.setTypeface(null, Typeface.BOLD);
+        ContentET.setText(Content);
+        TimeTV.setText(Time);
     }
 
     @Override
@@ -50,51 +55,60 @@ public class DispNdEdit extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            String UpdatedValue = Tv.getText().toString().trim();
-            if (!UpdatedValue.equals(Value)) {
-                if (!Objects.equals(UpdatedValue, ""))
-                    myRef.child(Key).setValue(UpdatedValue);
-                else
-                    myRef.child(Key).removeValue();
-                Toast.makeText(getApplicationContext(), "Updated!", Toast.LENGTH_SHORT).show();
-            }else{
-                Toast.makeText(getApplicationContext(),"No updates",Toast.LENGTH_SHORT).show();
-            }
-        }
-        return super.onKeyDown(keyCode, event);
-    }
+//    @Override
+//    public boolean onKeyDown(int keyCode, KeyEvent event) {
+//        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+//            String UpdatedValue = Tv.getText().toString().trim();
+//            if (!UpdatedValue.equals(Value)) {
+//                if (!Objects.equals(UpdatedValue, ""))
+//                    myRef.child(Key).setValue(UpdatedValue);
+//                else
+//                    myRef.child(Key).removeValue();
+//                Toast.makeText(getApplicationContext(), "Updated!", Toast.LENGTH_SHORT).show();
+//            }else{
+//                Toast.makeText(getApplicationContext(),"No updates",Toast.LENGTH_SHORT).show();
+//            }
+//        }
+//        return super.onKeyDown(keyCode, event);
+//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        String UpdatedValue = Tv.getText().toString().trim();
+        String NewTitle = TitleET.getText().toString().trim();
+        String NewContent = ContentET.getText().toString().trim();
         switch (item.getItemId()){
-            case R.id.home:
-                if (!UpdatedValue.equals(Value)) {
-                    if (!Objects.equals(UpdatedValue, ""))
-                        myRef.child(Key).setValue(UpdatedValue);
-                    else
-                        myRef.child(Key).removeValue();
-                    Toast.makeText(getApplicationContext(), "Updated!", Toast.LENGTH_SHORT).show();
-                    return true;
-                }else{
-                    Toast.makeText(getApplicationContext(),"No updates",Toast.LENGTH_SHORT).show();
-                    return true;
-                }
             case R.id.update:
-                if (!UpdatedValue.equals(Value)) {
-                    if (!Objects.equals(UpdatedValue, ""))
-                        myRef.child(Key).setValue(UpdatedValue);
-                    else
-                        myRef.child(Key).removeValue();
+                if ((!Objects.equals(NewContent, "")) || (!Objects.equals(NewTitle, ""))) {
+                    myReference.child(Time).child("content").setValue(NewContent);
+                    myReference.child(Time).child("title").setValue(NewTitle);
                     Toast.makeText(getApplicationContext(), "Updated!", Toast.LENGTH_SHORT).show();
-                    return true;
-                }else{
-                    Toast.makeText(getApplicationContext(),"No updates",Toast.LENGTH_SHORT).show();
-                    return true;
                 }
+                else {
+                    myReference.child(Time).removeValue();
+                    Toast.makeText(getApplicationContext(), "Deleted!", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            case R.id.delete:
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case DialogInterface.BUTTON_POSITIVE:
+                                myReference.child(Time).removeValue();
+                                Intent back = new Intent(DispNdEdit.this,DisplayStats.class);
+                                startActivity(back);
+                                break;
+
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                //No button clicked
+                                break;
+                        }
+                    }
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("Confirm delete?").setPositiveButton("ok", dialogClickListener).setNegativeButton("cancel", dialogClickListener).show();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

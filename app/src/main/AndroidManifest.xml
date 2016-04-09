@@ -21,12 +21,10 @@
         </activity>
         <activity
             android:name=".AddStats"
-            android:label="Add Notes"
-            android:parentActivityName=".DisplayStats"/>
+            android:label="Add Notes" />
         <activity
             android:name=".DispNdEdit"
-            android:label="Edit Note"
-            android:parentActivityName=".DisplayStats"/>
+            android:label="Edit Note" />
     </application>
 
 </manifest>

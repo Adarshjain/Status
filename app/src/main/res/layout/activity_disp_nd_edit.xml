@@ -7,37 +7,30 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.geekyadarsh.stats.DispNdEdit">
+    tools:context="com.example.geekyadarsh.stats.DispNdEdit"
+    android:background="@color/bodyback">
 
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ETTitle"
+        android:background="@android:color/transparent" />
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ETTitle"
+        android:inputType="textMultiLine|textCapSentences"
+        android:maxWidth="470dp"
+        android:layout_marginTop="5dp"
+        android:maxHeight="470dp"
+        android:paddingBottom="20dp"
+        android:id="@+id/ETContent"
+        android:background="@android:color/transparent" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/time"
-        android:textStyle="bold"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/scrolltop"
-        android:layout_below="@+id/time">
-
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:paddingBottom="5dp">
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textMultiLine|textCapSentences"
-                android:maxWidth="470dp"
-                android:paddingBottom="20dp"
-                android:id="@+id/editText"
-                android:background="@android:color/transparent" />
-
-        </ScrollView>
-
-    </LinearLayout>
+        android:layout_below="@+id/ETContent"
+        android:id="@+id/TVTime"
+        android:textStyle="bold" />
 </RelativeLayout>
